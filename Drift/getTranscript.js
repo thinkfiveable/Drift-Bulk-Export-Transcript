@@ -19,9 +19,9 @@ const getTranscript = async (conversationId) => {
     })
     .catch((err) => {
       console.log("Error fetching conversation data for conversation " + conversationId);
-      console.log("ERR HITTING URL ---> " + err.config.url);
-      console.log("ERR CODE ---> " + err.response.status);
-      console.log("ERR DATE ---> " + err.response.headers.date);
+      console.log("ERR HITTING URL ---> " + err.config?.url);
+      console.log("ERR CODE ---> " + err.response?.status);
+      console.log("ERR DATE ---> " + err.response?.headers.date);
       console.log("ERR MSG ---> " + err.message);
       return "Error"
     });

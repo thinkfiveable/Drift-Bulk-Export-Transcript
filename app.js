@@ -14,6 +14,13 @@ const messagesBuilder = require("./Drift/messagesBuilder.js"); // Optional to in
 const getAttributes = require("./Drift/getContactAttributes.js"); // Retrieve Contacts' attributes
 const participants = require("./Drift/getParticipants.js"); // Retrieve participants
 const getConvoMessages = require("./Drift/getMessages"); // Optional to retrieve messages for conversation id rather than transcripts
+const sqlite3 = require('sqlite3').verbose();
+const knex = require('knex')({
+  client: 'sqlite3',
+  connection: {
+    filename: 'export.sqlite'
+  }
+});
 
 // Count for total time it took to execute
 console.time();
@@ -36,9 +43,18 @@ console.time();
 
   // Loop through the conversation list to store conversation objects/transcripts
   for (const convoId of convoList) {
+    const result = await knex.select('convo_id')
+      .from('conversations').where({ convo_id: convoId.conversationId });
+
+    if (result?.length > 0) {
+      console.log(`Skipping ${convoId.conversationId} since it's in the db already.`)
+      continue;
+    } else {
+      console.log('Retrieving and inserting...');
+    }
+
     const convoObject = await getConvo.getConversation(convoId.conversationId);
     const transcriptObject = await getScript.getTranscript(convoId.conversationId);
-
 
     if (convoObject !== "Error") {
 
@@ -79,32 +95,35 @@ console.time();
         num_agent_messages: convoId.metrics[4], // Stores num_agent_messages
         num_bot_messages: convoId.metrics[5], // Stores num_bot_messages
         num_end_user_messages: convoId.metrics[6], // Stores num_end_user_messages
-        comments: convoMessages.comments, // Stores in internal comments
+        comments: JSON.stringify(convoMessages.comments), // Stores in internal comments
         transcriptObject: conversationTranscript // Stores transcriptObject
       };
 
       // Combines conversations data + tags 
       let convo = { ...convoBase, ...convoMessages.tags };
+      await knex('conversations').insert({
+        convo_id: convo.convo_id,
+        assignee_id: convo.assignee_id,
+        link_to_full_conversation: convo.link_to_full_conversation,
+        updatedat_date: convo.updatedat_date,
+        createdat_date: convo.createdat_date,
+        status: convo.status,
+        participant: convo.participant,
+        total_messages: convo.total_messages,
+        num_agent_messages: convo.num_agent_messages,
+        num_bot_messages: convo.num_bot_messages,
+        num_end_user_messages: convo.num_end_user_messages,
+        comments: convo.comments,
+        transcription: transcriptObject
+      });
+
       console.log("convo id " + convo.convo_id + " created.");
       convosArray.push(convo);
     }
+
+    await new Promise(resolve => setTimeout(resolve, 1000 / 2));
   }
 
-  console.log(`Total convos to send to CSV File: ${convosArray.length}`);
-
-  //submit convos-create-bulk job in batches of 100 convos - It can be modified to lower or higher number of total conversations
-  let loopsNeeded = Math.ceil(convosArray.length / 100);
-  let totalErrors = 0;
-  while (loopsNeeded > 0) {
-    const bulkExportResponse = await csvCreate(convosArray.splice(0, 100));
-
-    if (bulkExportResponse == "Error") {
-      console.log("Bulk convo export error. Check your code");
-    }
-    loopsNeeded--;
-  }
-
-  console.log("Total convo creation failures: " + totalErrors);
   console.log("Data Export is complete.");
   console.log("Total time to execute: ");
   console.timeEnd();

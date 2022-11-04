@@ -22,9 +22,9 @@ const getChatAgents = async () => {
       })
       .catch(err => {
         console.log("Error retrieving Drift Agents list.");
-        console.log("ERR HITTING URL ---> " + err.config.url);
-        console.log("ERR CODE ---> " + err.response.status);
-        console.log("ERR DATE ---> " + err.response.headers.date);
+        console.log("ERR HITTING URL ---> " + err.config?.url);
+        console.log("ERR CODE ---> " + err.response?.status);
+        console.log("ERR DATE ---> " + err.response?.headers?.date);
         console.log("ERR MSG ---> " + err.message);
         return {};
       })

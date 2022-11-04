@@ -37,9 +37,9 @@ const getConvoMessages = async (convoId, data, pagination) => {
       }
   }).catch(err => {
     console.log("Error retrieving messages for conversation id: "+convoId);
-    console.log("ERR HITTING URL ---> " + err.config.url);
-    console.log("ERR CODE ---> " + err.response.status);
-    console.log("ERR DATE ---> " + err.response.headers.date);
+    console.log("ERR HITTING URL ---> " + err.config?.url);
+    console.log("ERR CODE ---> " + err.response?.status);
+    console.log("ERR DATE ---> " + err.response?.headers.date);
     console.log("ERR MSG ---> " + err.message);
     data = ({data: {messages: []}}); //return an empty message array if an error occurs
   });

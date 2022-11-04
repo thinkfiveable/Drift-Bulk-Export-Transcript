@@ -1,3 +1,10 @@
+# Fiveable Drift Export
+
+- Add the .env file as noted below
+- `npm install`
+- `node db.js` to create your sqlite db
+- `node app.js` to collect the conversations
+
 # Drift Bulk Conversations Transcript Export
 ### Getting Started
 
