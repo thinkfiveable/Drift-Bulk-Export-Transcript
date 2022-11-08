@@ -18,27 +18,10 @@ const now = new Date().getTime(); // Defines now time to run a report within a t
 const data = JSON.stringify({
   "filters": [
     {
-      "property": "status",
-      "operation": "IN",
-      "values": [
-        "closed"
-      ]
+      "property": "numEndUserMessages",
+      "operation": "GT",
+      "value": 1
     },
-    {
-      "property": "lastAgentId",
-      "operation": "HAS_PROPERTY"
-    },
-    {
-      "property": "updatedAt",
-      "operation": "BETWEEN",
-      "values": [
-
-        //now-(1000*60*60*24*10),  //ensure this aligns with timer settings to run app.js
-       // now
-        "2020-09-01",
-        "2022-11-03"
-      ]
-    }
   ],
   "metrics": [
     "createdAt",
